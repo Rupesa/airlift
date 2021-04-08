@@ -6,41 +6,70 @@ public class SRDepartureAirport implements IDepartureAirport_Pilot, IDepartureAi
         
     }
     
-    // Hostess
-    public void prepareForPassBoarding(){
+    //--------------------------------------------------------------------------
+    //                                 HOSTESS                               
+    //--------------------------------------------------------------------------
+    
+    @Override
+    public synchronized void waitForNextFlight(){
         
     }
     
-    public void checkDocuments(){
-        
-    }
-        
-    public void waitForNextPassenger(){
+    @Override
+    public synchronized void waitForNextPassenger(){
         
     }
     
-    public void waitForNextFlight(){
+    @Override
+    public synchronized void askForDocuments(){
         
     }
     
-    // Passenger
-    public void travelToAirport(){
+    @Override
+    public synchronized void waitToCheckDocuments(){
+        
+    }
+    
+    @Override
+    public synchronized void informPlaneReadyToFly(){
+        
+    }
+    
+    //--------------------------------------------------------------------------
+    //                                 PASSENGER                               
+    //--------------------------------------------------------------------------
+    
+    @Override
+    public synchronized void travelToAirport(){
 
     }
     
-    public void waitInQueue(){
+    @Override
+    public synchronized void waitInQueue(){
         
     }
     
-    public void showDocuments(){
+    @Override
+    public synchronized void showDocuments(){
         
     }
     
-    // Pilot
-    public void informPlaneReadyForBoarding(){
+    @Override
+    public synchronized void waitToBeCheckedDocuments(){
+        
+    }
 
+    //--------------------------------------------------------------------------
+    //                                 PILOT                               
+    //--------------------------------------------------------------------------
+    
+    @Override
+    public synchronized void informPlaneReadyForBoarding(){
+        
     }
-    public void parkAtTransferGate(){
+    
+    @Override
+    public synchronized void waitForAllInBoard(){
         
     }
 }

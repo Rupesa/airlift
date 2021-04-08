@@ -1,31 +1,41 @@
 package Plane;
 
-public class SRPlane implements IPlane_Pilot, IPlane_Hostess, IPlane_Passenger {
+public class SRPlane implements IPlane_Pilot, IPlane_Passenger {
     
     public SRPlane(){
         
     }
     
-    // Hostess
-    public void informPlaneReadyToTakeOff(){
-        
-    }
+    //--------------------------------------------------------------------------
+    //                                 PASSENGER                               
+    //--------------------------------------------------------------------------
     
-    // Passenger
-    public void boardThePlane(){
+    @Override
+    public synchronized void boardThePlane(){
 
     }
     
-    public void waitForEndOfFlight(){
+    @Override
+    public synchronized void waitForEndOfFlight(){
         
     }
     
-    // Pilot
-    public void waitForAllInBoard(){
+    @Override
+    public synchronized void leaveThePlane(){
+
+    }
+    
+    //--------------------------------------------------------------------------
+    //                                 PILOT                               
+    //--------------------------------------------------------------------------
+    
+    @Override
+    public synchronized void waitForDeboard(){
         
     }
     
-    public void flyToDestinationPoint(){
+    @Override
+    public synchronized void announceArrival(){
         
     }   
 }

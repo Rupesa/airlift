@@ -7,11 +7,8 @@ import DepartureAirport.IDepartureAirport_Hostess;
 import DepartureAirport.IDepartureAirport_Passenger;
 import DepartureAirport.IDepartureAirport_Pilot;
 import DepartureAirport.SRDepartureAirport;
-import DestinationAirport.IDestinationAirport_Hostess;
 import DestinationAirport.IDestinationAirport_Passenger;
-import DestinationAirport.IDestinationAirport_Pilot;
 import DestinationAirport.SRDestinationAirport;
-import Plane.IPlane_Hostess;
 import Plane.IPlane_Passenger;
 import Plane.IPlane_Pilot;
 import Plane.SRPlane;
@@ -45,18 +42,18 @@ public class AirLift_89293_89264 {
         srPlane = new SRPlane();
         
         // active entities instantiation: Threads
-        aePilot = new AEPilot((IDepartureAirport_Pilot) srDepartureAirport, (IDestinationAirport_Pilot) srDestinationAirport, (IPlane_Pilot) srPlane);
-        aeHostess = new AEHostess((IDepartureAirport_Hostess) srDepartureAirport, (IDestinationAirport_Hostess) srDestinationAirport, (IPlane_Hostess) srPlane);
+        aePilot = new AEPilot((IDepartureAirport_Pilot) srDepartureAirport, (IPlane_Pilot) srPlane);
+        aeHostess = new AEHostess((IDepartureAirport_Hostess) srDepartureAirport, TTL_PASSENGER);
         aePassenger = new AEPassenger[MAX_PASSENGER];
         for (Integer i=0; i < TTL_PASSENGER; i++){
-            aePassenger[i] = new AEPassenger((IDepartureAirport_Passenger) srDepartureAirport, (IDestinationAirport_Passenger) srDestinationAirport, (IPlane_Passenger) srPlane);
+            aePassenger[i] = new AEPassenger(i+1, (IDepartureAirport_Passenger) srDepartureAirport, (IDestinationAirport_Passenger) srDestinationAirport, (IPlane_Passenger) srPlane);
         }
-        
-        // code
+
     }
     
     private void startSimulation(){
         System.out.println("Simulation started");
+        
         // start active entities : Threads
         aePilot.start();
         aeHostess.start();
@@ -67,16 +64,23 @@ public class AirLift_89293_89264 {
         // wait active entities to die
         try {
             aePilot.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        try {
             aeHostess.join();
-            for (Integer i=0; i < MAX_PASSENGER; i++){
-                aePassenger[i].join();
-            }
-        } catch (Exception ex){
-            // code
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
         
+        for (Integer i=0; i < MAX_PASSENGER; i++){
+            try{
+                aePassenger[i].join();
+            }catch (InterruptedException e){
+                e.printStackTrace();                    
+            }
+        }
         System.out.println("End of Simulation");
-
     }
     
     public static void main(String args[]){

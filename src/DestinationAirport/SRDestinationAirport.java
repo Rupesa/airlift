@@ -1,22 +1,17 @@
 package DestinationAirport;
 
-public class SRDestinationAirport implements IDestinationAirport_Pilot, IDestinationAirport_Hostess, IDestinationAirport_Passenger {
+public class SRDestinationAirport implements IDestinationAirport_Passenger {
     
     public SRDestinationAirport(){
         
     }
     
-    // Passenger
-    public void leaveThePlane(){
-        
-    }
+    //--------------------------------------------------------------------------
+    //                                 PASSENGER                               
+    //--------------------------------------------------------------------------
     
-    // Pilot
-    public void announceArrival(){
-        
-    }
-    
-    public void flyToDeparturePoint(){
+    @Override
+    public synchronized void leaveAirport(){
         
     }
 }
