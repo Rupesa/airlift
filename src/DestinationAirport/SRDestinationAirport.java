@@ -2,6 +2,10 @@ package DestinationAirport;
 
 public class SRDestinationAirport implements IDestinationAirport_Passenger {
     
+    // configurations
+    private int numberOfPassengersLeavingThePlane;
+    
+    // constructor
     public SRDestinationAirport(){
         
     }
@@ -12,6 +16,6 @@ public class SRDestinationAirport implements IDestinationAirport_Passenger {
     
     @Override
     public synchronized void leaveAirport(){
-        
+        numberOfPassengersLeavingThePlane++;
     }
 }

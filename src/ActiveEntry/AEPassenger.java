@@ -14,6 +14,7 @@ public class AEPassenger extends Thread {
     // configurations
     private int id;
     
+    // constructor
     public AEPassenger(int id, IDepartureAirport_Passenger iDepartureAirport_Passenger, IDestinationAirport_Passenger iDestinationAirport_Passenger, IPlane_Passenger iPlane_Passenger){
         iDepartureAirport = iDepartureAirport_Passenger;
         iDestinatonAirport = iDestinationAirport_Passenger;
@@ -23,7 +24,8 @@ public class AEPassenger extends Thread {
     
     @Override
     public void run(){
-        // going to airport
+        System.out.println("----- Started Passenger " + getPassengerId() + " activity -----");
+        airlift_89293_89264.AirLift_89293_89264.sleepTime(5,20);   // time to go to the airport
         iDepartureAirport.travelToAirport();
         iDepartureAirport.waitInQueue();
         iDepartureAirport.showDocuments();
@@ -32,6 +34,14 @@ public class AEPassenger extends Thread {
         iPlane.waitForEndOfFlight();
         iPlane.leaveThePlane();
         iDestinatonAirport.leaveAirport();
-        System.out.println("Passenger ended activity");
+        System.out.println("------ Ended Passenger " + getPassengerId() + " activity ------");
     }   
+        
+    public int getPassengerId(){
+        return id;
+    }
+    
+    public void setPassengerId(int id){
+        this.id = id;
+    }
 }

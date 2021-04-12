@@ -20,7 +20,7 @@ public class AirLift_89293_89264 {
     private final SRDestinationAirport srDestinationAirport;
     private final SRPlane srPlane;
     
-    // active entities
+    // active entities (threads)
     private final AEHostess aeHostess;
     private final AEPassenger[] aePassenger;
     private final AEPilot aePilot;
@@ -36,55 +36,68 @@ public class AirLift_89293_89264 {
         MIN_PASSENGER = 5;
         
         // shared regions instantiation
-        srDepartureAirport = new SRDepartureAirport();
-//        srDepartureAirport = new SRDepartureAirport(MIN_PASSENGER, MAX_PASSENGER);
+        srDepartureAirport = new SRDepartureAirport(MIN_PASSENGER, MAX_PASSENGER);
         srDestinationAirport = new SRDestinationAirport();
         srPlane = new SRPlane();
         
-        // active entities instantiation: Threads
+        // active entities (threads) instantiation
         aePilot = new AEPilot((IDepartureAirport_Pilot) srDepartureAirport, (IPlane_Pilot) srPlane);
         aeHostess = new AEHostess((IDepartureAirport_Hostess) srDepartureAirport, TTL_PASSENGER);
-        aePassenger = new AEPassenger[MAX_PASSENGER];
-        for (Integer i=0; i < TTL_PASSENGER; i++){
+        aePassenger = new AEPassenger[TTL_PASSENGER];
+        for (int i=0; i < aePassenger.length; i++){
             aePassenger[i] = new AEPassenger(i+1, (IDepartureAirport_Passenger) srDepartureAirport, (IDestinationAirport_Passenger) srDestinationAirport, (IPlane_Passenger) srPlane);
         }
-
     }
     
-    private void startSimulation(){
-        System.out.println("Simulation started");
+    public static void sleepTime(int min, int max){
+        int randomTime = (int) ((Math.random() * (max-min)) + min);
         
-        // start active entities : Threads
+        try {
+            Thread.sleep(randomTime * 1000);
+        } catch (InterruptedException e){
+            e.printStackTrace();
+        }
+    } 
+    
+    private void startSimulation(){
+        System.out.println("--------------------------------------------------------------------------------------------------");
+        System.out.println("                                        Simulation started                                        ");
+        System.out.println("--------------------------------------------------------------------------------------------------");
+
+        // start active entities (threads)
         aePilot.start();
         aeHostess.start();
-        for (Integer i=0; i < MAX_PASSENGER; i++){
+        for (int i=0; i < aePassenger.length; i++){
             aePassenger[i].start();
         }
         
-        // wait active entities to die
+        // wait active entities (threads) to die
         try {
             aePilot.join();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        
         try {
             aeHostess.join();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
         
-        for (Integer i=0; i < MAX_PASSENGER; i++){
+        for (int i=0; i < aePassenger.length; i++){
             try{
                 aePassenger[i].join();
             }catch (InterruptedException e){
                 e.printStackTrace();                    
             }
         }
-        System.out.println("End of Simulation");
+        
+        System.out.println("--------------------------------------------------------------------------------------------------");
+        System.out.println("                                        Simulation is over                                        ");
+        System.out.println("--------------------------------------------------------------------------------------------------");
     }
     
     public static void main(String args[]){
         new AirLift_89293_89264(args).startSimulation();
-
     }
 }
