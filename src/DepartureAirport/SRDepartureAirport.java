@@ -2,6 +2,7 @@ package DepartureAirport;
 
 import ActiveEntry.AEHostess;
 import ActiveEntry.AEPassenger;
+import GeneralRepository.GeneralRepos;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -19,9 +20,20 @@ public class SRDepartureAirport implements IDepartureAirport_Pilot, IDepartureAi
     private boolean hostessInformPlaneReadyToTakeOff;
     private static boolean hostessInformPilotToEndActivity;
     private boolean pilotInformPlaneReadyForBoarding;
-
-    // constructor
-    public SRDepartureAirport(int min, int max){
+    
+    /**
+    *   Reference to the general repository.
+    */
+    private final GeneralRepos repos;
+    
+    /**
+    *   Departure Airport instantiation.
+    *   
+    *   @param min minimum number of passengers per flight
+    *   @param max maximum number of passengers per flight
+    *   @param repos reference to the general repository
+    */
+    public SRDepartureAirport(int min, int max, GeneralRepos repos){
         passengers = new LinkedList<>();
         this.MIN_PASSENGER = min;
         this.MAX_PASSENGER = max;
@@ -33,6 +45,7 @@ public class SRDepartureAirport implements IDepartureAirport_Pilot, IDepartureAi
         hostessInformPlaneReadyToTakeOff = false;
         hostessInformPilotToEndActivity = false;
         pilotInformPlaneReadyForBoarding = false;
+        this.repos = repos;
     }
     
     //--------------------------------------------------------------------------

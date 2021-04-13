@@ -4,18 +4,59 @@ import DepartureAirport.IDepartureAirport_Pilot;
 import DepartureAirport.SRDepartureAirport;
 import Plane.IPlane_Pilot;
 
+/**
+ *  Pilot thread.
+ *
+ *  It simulates the pilot life cycle.
+ */
 public class AEPilot extends Thread {
     
-    // shared regions
+    /**
+    *   Reference to the shared regions.
+    */
     private final IDepartureAirport_Pilot iDepartureAirport;
     private final IPlane_Pilot iPlane;
     
-    // constructor
-    public AEPilot(IDepartureAirport_Pilot iDepartureAirport_Pilot, IPlane_Pilot iPlane_Pilot){
+    /**
+    *   Pilot state.
+    */
+    private int pilotState;
+    
+    /**
+    *   Instantiation of a pilot thread.
+    *   
+    *   @param name thread name
+    *   @param iDepartureAirport_Passenger reference to the Departure Airport
+    *   @param iPlane_Passenger reference to the Plane 
+    */
+    public AEPilot(String name, IDepartureAirport_Pilot iDepartureAirport_Pilot, IPlane_Pilot iPlane_Pilot){
+        super(name);
         iDepartureAirport = iDepartureAirport_Pilot;
         iPlane = iPlane_Pilot;
+        this.pilotState = AEPilotStates.ATGR;
     } 
     
+    /**
+    *   Get pilot state.
+    *
+    *   @return pilot state
+    */
+    public int getPilotState(){
+        return pilotState;
+    }
+    
+    /**
+    *   Set pilot state.
+    *
+    *   @param state pilot state
+    */
+    public void setPilotState(int state){
+        this.pilotState = state;
+    }
+    
+    /**
+    *   Life cycle of the pilot.
+    */
     @Override
     public void run(){
         System.out.println("-------- Started Pilot activity --------");
@@ -25,13 +66,25 @@ public class AEPilot extends Thread {
             }
             iDepartureAirport.informPlaneReadyForBoarding();
             iDepartureAirport.waitForAllInBoard();
-            airlift_89293_89264.AirLift_89293_89264.sleepTime(5,20);   // flight time
+            flyToOppositeAirport();
             iPlane.announceArrival();
             iPlane.waitForDeboard();      
-            airlift_89293_89264.AirLift_89293_89264.sleepTime(5,20);   // flight time
+            flyToOppositeAirport();
         }
         System.out.println("--------- Ended Pilot activity ---------"); 
     }
     
+    /**
+    *  The pilot flies to destination airport.
+    *
+    *  Internal operation.
+    */
+    private void flyToOppositeAirport (){
+        try{
+            sleep ((long) (1 + 20 * Math.random ()));
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
 
 }

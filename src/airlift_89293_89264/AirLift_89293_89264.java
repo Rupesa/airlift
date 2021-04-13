@@ -9,95 +9,106 @@ import DepartureAirport.IDepartureAirport_Pilot;
 import DepartureAirport.SRDepartureAirport;
 import DestinationAirport.IDestinationAirport_Passenger;
 import DestinationAirport.SRDestinationAirport;
+import GeneralRepository.GeneralRepos;
 import Plane.IPlane_Passenger;
 import Plane.IPlane_Pilot;
 import Plane.SRPlane;
+import genclass.GenericIO;
+import genclass.FileOp;
 
+/**
+ *  Simulation of the AirLift problem.
+ * 
+ *  @author Rui Santos (89293)
+ *  @author Rita Amante (89264)
+ */
 public class AirLift_89293_89264 {
     
-    // shared regions
-    private final SRDepartureAirport srDepartureAirport;
-    private final SRDestinationAirport srDestinationAirport;
-    private final SRPlane srPlane;
-    
-    // active entities (threads)
-    private final AEHostess aeHostess;
-    private final AEPassenger[] aePassenger;
-    private final AEPilot aePilot;
-    
-    // configuration
-    private final Integer TTL_PASSENGER;
-    private final Integer MAX_PASSENGER;
-    private final Integer MIN_PASSENGER;
+    /**
+    *   Main method.
+    *
+    *   @param args runtime arguments
+    */
+    public static void main(String args[]){
+        /* references to the shared regions */
+        GeneralRepos repos;
+        SRDepartureAirport srDepartureAirport;
+        SRDestinationAirport srDestinationAirport;
+        SRPlane srPlane;
+        
+        /* references to the active entities */
+        AEHostess aeHostess;
+        AEPilot aePilot;
+        AEPassenger[] aePassenger;
+        
+        /* file options  */
+        String fileName;
+        char opt;
+        boolean success; 
+        
+        /* problem initialization */
+        GenericIO.writelnString ("\n" + "      Problem of the Air Lift\n");
+        do {
+            GenericIO.writeString ("Logging file name? ");
+            fileName = GenericIO.readlnString ();
+            if (FileOp.exists (".", fileName)){
+                do {
+                    GenericIO.writeString ("There is already a file with this name. Delete it (y - yes; n - no)? ");
+                    opt = GenericIO.readlnChar ();
+                } while ((opt != 'y') && (opt != 'n'));
+                if (opt == 'y')
+                    success = true;
+                else 
+                    success = false;
+           }
+           else 
+                success = true;
+        } while (!success);
 
-    public AirLift_89293_89264 (String args[]){
-        TTL_PASSENGER = 21;
-        MAX_PASSENGER = 10;
-        MIN_PASSENGER = 5;
+        /* instantiation shared region */
+        repos = new GeneralRepos (fileName);
+        srDepartureAirport = new SRDepartureAirport(SimulationParameters.MIN_PASSENGER, SimulationParameters.MAX_PASSENGER, repos);
+        srDestinationAirport = new SRDestinationAirport(repos);
+        srPlane = new SRPlane(repos);
         
-        // shared regions instantiation
-        srDepartureAirport = new SRDepartureAirport(MIN_PASSENGER, MAX_PASSENGER);
-        srDestinationAirport = new SRDestinationAirport();
-        srPlane = new SRPlane();
-        
-        // active entities (threads) instantiation
-        aePilot = new AEPilot((IDepartureAirport_Pilot) srDepartureAirport, (IPlane_Pilot) srPlane);
-        aeHostess = new AEHostess((IDepartureAirport_Hostess) srDepartureAirport, TTL_PASSENGER);
-        aePassenger = new AEPassenger[TTL_PASSENGER];
+        /* instantiation to the active entities */
+        aeHostess = new AEHostess("Hostess", (IDepartureAirport_Hostess) srDepartureAirport, SimulationParameters.TTL_PASSENGER);
+        aePilot = new AEPilot("Pilot", (IDepartureAirport_Pilot) srDepartureAirport, (IPlane_Pilot) srPlane);
+        aePassenger = new AEPassenger[SimulationParameters.TTL_PASSENGER];
         for (int i=0; i < aePassenger.length; i++){
-            aePassenger[i] = new AEPassenger(i+1, (IDepartureAirport_Passenger) srDepartureAirport, (IDestinationAirport_Passenger) srDestinationAirport, (IPlane_Passenger) srPlane);
+            aePassenger[i] = new AEPassenger("Passenger_" + i+1, i, (IDepartureAirport_Passenger) srDepartureAirport, (IDestinationAirport_Passenger) srDestinationAirport, (IPlane_Passenger) srPlane);
         }
-    }
-    
-    public static void sleepTime(int min, int max){
-        int randomTime = (int) ((Math.random() * (max-min)) + min);
         
-        try {
-            Thread.sleep(randomTime * 1000);
-        } catch (InterruptedException e){
-            e.printStackTrace();
-        }
-    } 
-    
-    private void startSimulation(){
-        System.out.println("--------------------------------------------------------------------------------------------------");
-        System.out.println("                                        Simulation started                                        ");
-        System.out.println("--------------------------------------------------------------------------------------------------");
-
-        // start active entities (threads)
+        /* start of the simulation */
         aePilot.start();
         aeHostess.start();
         for (int i=0; i < aePassenger.length; i++){
             aePassenger[i].start();
         }
-        
-        // wait active entities (threads) to die
+
+        /* waiting for the end of the simulation */
+        GenericIO.writelnString ();
         try {
             aePilot.join();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        
+        GenericIO.writelnString ("The pilot has terminated.");
         try {
             aeHostess.join();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        
+        GenericIO.writelnString ("The hostess has terminated.");
         for (int i=0; i < aePassenger.length; i++){
             try{
                 aePassenger[i].join();
             }catch (InterruptedException e){
                 e.printStackTrace();                    
             }
+            GenericIO.writelnString ("The passenger " + (i+1) + " has terminated.");
         }
         
-        System.out.println("--------------------------------------------------------------------------------------------------");
-        System.out.println("                                        Simulation is over                                        ");
-        System.out.println("--------------------------------------------------------------------------------------------------");
-    }
-    
-    public static void main(String args[]){
-        new AirLift_89293_89264(args).startSimulation();
+        GenericIO.writelnString ();
     }
 }

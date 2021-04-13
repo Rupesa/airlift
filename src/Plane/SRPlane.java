@@ -1,21 +1,55 @@
 package Plane;
 
 import ActiveEntry.AEPassenger;
+import GeneralRepository.GeneralRepos;
+import airlift_89293_89264.SimulationParameters;
+import commInfra.MemException;
+import commInfra.MemFIFO;
+import genclass.GenericIO;
 import java.util.LinkedList;
 import java.util.Queue;
 
+/**
+ *  Plane.
+ *
+ *  Is implemented as an implicit monitor.
+ *  All public methods are executed in mutual exclusion.
+ */
 public class SRPlane implements IPlane_Pilot, IPlane_Passenger {
     
-    // configurations
+    /**
+    *   Passenger queue on the plane.
+    */
     private Queue<Integer> passengers;
+//    private MemFIFO<Integer> passengers;  
+    
+    
     private boolean lastPassengerLeaveThePlane;
     private boolean pilotAnnounceArrival;
     
-    // constructor
-    public SRPlane(){
+    /**
+    *   Reference to the general repository.
+    */
+    private final GeneralRepos repos;
+    
+    /**
+    *   Plane instantiation.
+    *   
+    *   @param repos reference to the general repository
+    */
+    public SRPlane(GeneralRepos repos){
         passengers = new LinkedList<>();
+//        try{
+//            passengers = new MemFIFO<> (new Integer [SimulationParameters.TTL_PASSENGER]);
+//        }
+//        catch (MemException e){
+//            GenericIO.writelnString ("Instantiation of waiting FIFO failed: " + e.getMessage ());
+//            passengers = null;
+//            System.exit (1);
+//        }
         this.lastPassengerLeaveThePlane = false;
         this.pilotAnnounceArrival = false;
+        this.repos = repos;
     }
     
     //--------------------------------------------------------------------------
@@ -26,6 +60,7 @@ public class SRPlane implements IPlane_Pilot, IPlane_Passenger {
     public synchronized void boardThePlane(){
         AEPassenger pass = (AEPassenger) Thread.currentThread();
         passengers.add(pass.getPassengerId());
+//        passengers.write(pass.getPassengerId());
         System.out.println("Passenger " + pass.getPassengerId() + " boarded the plane");  
     }
     

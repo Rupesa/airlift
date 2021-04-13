@@ -4,28 +4,91 @@ import DepartureAirport.IDepartureAirport_Passenger;
 import DestinationAirport.IDestinationAirport_Passenger;
 import Plane.IPlane_Passenger;
 
+/**
+ *  Passenger thread.
+ *
+ *  It simulates the passenger life cycle.
+ */
 public class AEPassenger extends Thread {
     
-    // shared regions
+    /**
+    *   Reference to the shared regions.
+    */
     private final IDepartureAirport_Passenger iDepartureAirport;
     private final IDestinationAirport_Passenger iDestinatonAirport;
     private final IPlane_Passenger iPlane;
 
-    // configurations
+    /**
+    *   Passenger identification.
+    */
     private int id;
     
-    // constructor
-    public AEPassenger(int id, IDepartureAirport_Passenger iDepartureAirport_Passenger, IDestinationAirport_Passenger iDestinationAirport_Passenger, IPlane_Passenger iPlane_Passenger){
+    /**
+    *   Passenger state.
+    */
+    private int passengerState;
+    
+    /**
+    *   Instantiation of a passenger thread.
+    *
+    *   @param name thread name
+    *   @param id passenger id
+    *   @param iDepartureAirport_Passenger reference to the Departure Airport
+    *   @param iDestinationAirport_Passenger reference to the Destination Airport 
+    *   @param iPlane_Passenger reference to the Plane 
+    */
+    public AEPassenger(String name, int id, IDepartureAirport_Passenger iDepartureAirport_Passenger, IDestinationAirport_Passenger iDestinationAirport_Passenger, IPlane_Passenger iPlane_Passenger){
+        super(name);
         iDepartureAirport = iDepartureAirport_Passenger;
         iDestinatonAirport = iDestinationAirport_Passenger;
-        iPlane = iPlane_Passenger;  
+        iPlane = iPlane_Passenger;
         this.id = id;
+        passengerState = AEPassengerStates.GTAP;
     }   
+        
+    /**
+    *   Get passenger id.
+    *
+    *   @return passenger id
+    */
+    public int getPassengerId(){
+        return id;
+    }
     
+    /**
+    *   Set passenger id.
+    *
+    *   @param id passenger id
+    */
+    public void setPassengerId(int id){
+        this.id = id;
+    }
+    
+    /**
+    *   Get passenger state.
+    *
+    *   @return passenger state
+    */
+    public int getPassengerState(){
+        return passengerState;
+    }
+    
+    /**
+    *   Set passenger state.
+    *
+    *   @param state passenger state
+    */
+    public void setPassengerState(int state){
+        this.passengerState = state;
+    }
+    
+    /**
+    *   Life cycle of the passenger.
+    */
     @Override
     public void run(){
         System.out.println("----- Started Passenger " + getPassengerId() + " activity -----");
-        airlift_89293_89264.AirLift_89293_89264.sleepTime(5,20);   // time to go to the airport
+        goingToAirport();
         iDepartureAirport.travelToAirport();
         iDepartureAirport.waitInQueue();
         iDepartureAirport.showDocuments();
@@ -35,13 +98,18 @@ public class AEPassenger extends Thread {
         iPlane.leaveThePlane();
         iDestinatonAirport.leaveAirport();
         System.out.println("------ Ended Passenger " + getPassengerId() + " activity ------");
-    }   
-        
-    public int getPassengerId(){
-        return id;
     }
     
-    public void setPassengerId(int id){
-        this.id = id;
+    /**
+    *  The passenger goes to the airport.
+    *
+    *  Internal operation.
+    */
+    private void goingToAirport (){
+        try{
+            sleep ((long) (1 + 20 * Math.random ()));
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }
