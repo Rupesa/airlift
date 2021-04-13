@@ -64,12 +64,20 @@ public class AEPilot extends Thread {
             if(SRDepartureAirport.informPilotToEndActivity()){
                 break;
             }
+            // estado inicial  : ATRG
             iDepartureAirport.informPlaneReadyForBoarding();
+            // mudar de estado : ATRG -> RDFB
             iDepartureAirport.waitForAllInBoard();
-            flyToOppositeAirport();
+            // mudar de estado : RDFB -> WTFB          
+            flyToDestinationPoint();
+            // mudar de estado : WTFB -> FLFW           
             iPlane.announceArrival();
-            iPlane.waitForDeboard();      
-            flyToOppositeAirport();
+            // mudar de estado : FLFW -> DRPP
+            iPlane.waitForDeboard();   // nao esta no diagrama   
+            flyToDeparturePoint();
+            // mudar de estado : DRPP -> FLBK
+            // falta o parkAtTransferGate
+            // mudar de estado : FLBK -> ATRG
         }
         System.out.println("--------- Ended Pilot activity ---------"); 
     }
@@ -79,7 +87,7 @@ public class AEPilot extends Thread {
     *
     *  Internal operation.
     */
-    private void flyToOppositeAirport (){
+    private void flyToDestinationPoint (){
         try{
             sleep ((long) (1 + 20 * Math.random ()));
         } catch (InterruptedException e) {
@@ -87,4 +95,16 @@ public class AEPilot extends Thread {
         }
     }
 
+    /**
+    *  The pilot flies to departure airport.
+    *
+    *  Internal operation.
+    */
+    private void flyToDeparturePoint (){
+        try{
+            sleep ((long) (1 + 20 * Math.random ()));
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
 }
