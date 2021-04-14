@@ -3,6 +3,7 @@ package DepartureAirport;
 import ActiveEntry.AEHostess;
 import ActiveEntry.AEPassenger;
 import GeneralRepository.GeneralRepos;
+import genclass.GenericIO;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -55,7 +56,7 @@ public class SRDepartureAirport implements IDepartureAirport_Pilot, IDepartureAi
     @Override
     public synchronized void waitForNextFlight(){
         while(!pilotInformPlaneReadyForBoarding){
-            System.out.println("Hostess is waiting for the next flight to be ready to be boarded");
+            GenericIO.writelnString("Hostess is waiting for the next flight to be ready to be boarded");
             try {
                 wait();
             } catch (InterruptedException e){
@@ -66,11 +67,10 @@ public class SRDepartureAirport implements IDepartureAirport_Pilot, IDepartureAi
     
     @Override
     public synchronized void waitForNextPassenger(){
-        hostessWaitingForNextPassenger = false;
         notifyAll();
         int next;
         while(passengers.size() == 0){
-            System.out.println("Hostess is waiting for passengers");
+            GenericIO.writelnString("Hostess is waiting for passengers");
             try {
                 wait();
             } catch (InterruptedException e){
@@ -79,51 +79,38 @@ public class SRDepartureAirport implements IDepartureAirport_Pilot, IDepartureAi
         }
         next = passengers.remove();
         notifyAll();
-        System.out.println("Hostess accepted a passenger for check in");
-    }
-    
-    @Override
-    public synchronized void askForDocuments(){
-        System.out.println("Hostess asked passenger for documents");
-        hostessAsksPassengerForDocuments = true;
-        notifyAll();
+        GenericIO.writelnString("Hostess accepted a passenger for check in");
     }
     
     @Override
     public synchronized void waitToCheckPassenger(){
-        while(!passengerShowingDocuments){
-            System.out.println("Hostess is waiting for passenger to give documents");
-            try {
-                wait();
-            } catch (InterruptedException e){
-                e.printStackTrace();
-            }
-        }
-        hostessWaitingForNextPassenger = true;
-        passengerShowingDocuments = false;
-        System.out.println("Hostess received and accepted documents");
+        GenericIO.writelnString("Hostess asked passenger for documents");
+        hostessAsksPassengerForDocuments = true;
         notifyAll();
-        while(!passengerChekedIn){
+        while(!passengerShowingDocuments){
+            GenericIO.writelnString("Hostess is waiting for passenger to give documents");
             try {
                 wait();
             } catch (InterruptedException e){
                 e.printStackTrace();
             }
         }
-        passengerChekedIn = false;
+        passengerShowingDocuments = false;
+        GenericIO.writelnString("Hostess received and accepted documents");
+        numberOfPassengerOnThePlane++;
     }
     
     @Override
-    public synchronized void informPlaneReadyToFly(){
+    public synchronized void informPlaneReadyToTakeOff(){
         AEHostess hostess = (AEHostess) Thread.currentThread();
         if((passengers.size() == 0 && numberOfPassengerOnThePlane > MIN_PASSENGER) || numberOfPassengerOnThePlane == MAX_PASSENGER || (passengers.size() == 0 && hostess.checkIfAllPassengersAreAttended())){
             hostessInformPlaneReadyToTakeOff = true;
             if (hostess.checkIfAllPassengersAreAttended()){
                 hostessInformPilotToEndActivity = true;
-                System.out.println("Hostess informs pilot that he can end activity");
+                GenericIO.writelnString("Hostess informs pilot that he can end activity");
             }
             notifyAll();
-            System.out.println("Hostess informs plane is ready to fly");
+            GenericIO.writelnString("Hostess informs plane is ready to fly");
             while(pilotInformPlaneReadyForBoarding){
                 try {
                     wait();
@@ -145,13 +132,13 @@ public class SRDepartureAirport implements IDepartureAirport_Pilot, IDepartureAi
         AEPassenger pass = (AEPassenger) Thread.currentThread();
         passengers.add(pass.getPassengerId());
         notifyAll();
-        System.out.println("Passenger " + pass.getPassengerId() + " go to airport");
+        GenericIO.writelnString("Passenger " + pass.getPassengerId() + " go to airport");
     }
     
     @Override
     public synchronized void waitInQueue(){
         AEPassenger pass = (AEPassenger) Thread.currentThread();
-        System.out.println("Passenger " + pass.getPassengerId() + " is waiting in queue");
+        GenericIO.writelnString("Passenger " + pass.getPassengerId() + " is waiting in queue");
         while(passengers.contains(pass.getPassengerId())){
             try {
                 wait();
@@ -163,7 +150,7 @@ public class SRDepartureAirport implements IDepartureAirport_Pilot, IDepartureAi
     
     @Override
     public synchronized void showDocuments(){
-        System.out.println("Passenger is being asked for documents");
+        GenericIO.writelnString("Passenger is being asked for documents");
         while(!hostessAsksPassengerForDocuments){
             try {
                 wait();
@@ -172,23 +159,7 @@ public class SRDepartureAirport implements IDepartureAirport_Pilot, IDepartureAi
             }
         }
         passengerShowingDocuments = true;
-        notifyAll();
-        System.out.println("Passenger showed documents");
-    }
-    
-    @Override
-    public synchronized void waitToBeCheckedDocuments(){
-        System.out.println("Passenger waiting to be cheked documents");
-        while(!hostessWaitingForNextPassenger){
-            try {
-                wait();
-            } catch (InterruptedException e){
-                e.printStackTrace();
-            }
-        }
-        passengerChekedIn = true;
-        numberOfPassengerOnThePlane++;
-        System.out.println("Passenger was checked documents");
+        GenericIO.writelnString("Passenger showed documents");
         notifyAll();
     }
 
@@ -198,14 +169,14 @@ public class SRDepartureAirport implements IDepartureAirport_Pilot, IDepartureAi
     
     @Override
     public synchronized void informPlaneReadyForBoarding(){
-        System.out.println("Pilot informed plane is ready to be boarded");
+        GenericIO.writelnString("Pilot informed plane is ready to be boarded");
         pilotInformPlaneReadyForBoarding = true;
         notifyAll();
     }
     
     @Override
     public synchronized void waitForAllInBoard(){
-        System.out.println("Pilot is waiting for the boarding to be finished");
+        GenericIO.writelnString("Pilot is waiting for the boarding to be finished");
         while(!hostessInformPlaneReadyToTakeOff){
             try {
                 wait();
@@ -215,7 +186,7 @@ public class SRDepartureAirport implements IDepartureAirport_Pilot, IDepartureAi
         }
         pilotInformPlaneReadyForBoarding = false;
         notifyAll(); 
-        System.out.println("Boarding is finished and pilot is going to fly");
+        GenericIO.writelnString("Boarding is finished and pilot is going to fly");
     }
     
     // extras

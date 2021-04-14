@@ -71,10 +71,9 @@ public class AEHostess extends Thread {
         while(!checkIfAllPassengersAreAttended()){            
             iDepartureAirport.waitForNextFlight();
             iDepartureAirport.waitForNextPassenger();
-            iDepartureAirport.askForDocuments();
             iDepartureAirport.waitToCheckPassenger();
             numberOfAttendedPassengers++;
-            iDepartureAirport.informPlaneReadyToFly();
+            iDepartureAirport.informPlaneReadyToTakeOff();
         }
         System.out.println("-------- Ended Hostess activity --------");
     }

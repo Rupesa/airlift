@@ -60,16 +60,11 @@ public class AEPilot extends Thread {
     @Override
     public void run(){
         System.out.println("-------- Started Pilot activity --------");
-        while(true){
-            if(SRDepartureAirport.informPilotToEndActivity()){
-                break;
-            }
-
+        while(!SRDepartureAirport.informPilotToEndActivity()){
             iDepartureAirport.informPlaneReadyForBoarding();
             iDepartureAirport.waitForAllInBoard();      
             flyToDestinationPoint();        
             iPlane.announceArrival();
-            iPlane.waitForDeboard();
             flyToDeparturePoint();
         }
         System.out.println("--------- Ended Pilot activity ---------"); 

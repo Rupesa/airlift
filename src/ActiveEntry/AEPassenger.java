@@ -93,7 +93,6 @@ public class AEPassenger extends Thread {
         iDepartureAirport.travelToAirport();
         iDepartureAirport.waitInQueue();
         iDepartureAirport.showDocuments();
-        iDepartureAirport.waitToBeCheckedDocuments();
         iPlane.boardThePlane();
         iPlane.waitForEndOfFlight();
         iPlane.leaveThePlane();

@@ -61,12 +61,12 @@ public class SRPlane implements IPlane_Pilot, IPlane_Passenger {
         AEPassenger pass = (AEPassenger) Thread.currentThread();
         passengers.add(pass.getPassengerId());
 //        passengers.write(pass.getPassengerId());
-        System.out.println("Passenger " + pass.getPassengerId() + " boarded the plane");  
+        GenericIO.writelnString("Passenger " + pass.getPassengerId() + " boarded the plane");  
     }
     
     @Override
     public synchronized void waitForEndOfFlight(){
-        System.out.println("Passenger is waiting for end of flight");  
+        GenericIO.writelnString("Passenger is waiting for end of flight");  
         while(!pilotAnnounceArrival){
             try {
                 wait();
@@ -80,11 +80,11 @@ public class SRPlane implements IPlane_Pilot, IPlane_Passenger {
     public synchronized void leaveThePlane(){
         AEPassenger pass = (AEPassenger) Thread.currentThread();
         passengers.remove(pass.getPassengerId());
-        System.out.println("Passenger " + pass.getPassengerId() + " left the plane");  
+        GenericIO.writelnString("Passenger " + pass.getPassengerId() + " left the plane");  
         if (passengers.size() == 0){
             lastPassengerLeaveThePlane = true;
             notifyAll();
-            System.out.println("Passenger " + pass.getPassengerId() + " notified the pilot that he is the last");  
+            GenericIO.writelnString("Passenger " + pass.getPassengerId() + " notified the pilot that he is the last");  
         }
     }
     
@@ -94,13 +94,9 @@ public class SRPlane implements IPlane_Pilot, IPlane_Passenger {
     
     @Override
     public synchronized void announceArrival(){
-        System.out.println("Pilot announced the arrival");
+        GenericIO.writelnString("Pilot announced the arrival");
         pilotAnnounceArrival = true;
         notifyAll();
-    } 
-    
-    @Override
-    public synchronized void waitForDeboard(){
         System.out.print("Pilot is waiting for deboarding");  
         while(!lastPassengerLeaveThePlane){
             try {
@@ -112,5 +108,5 @@ public class SRPlane implements IPlane_Pilot, IPlane_Passenger {
         pilotAnnounceArrival = false;
         lastPassengerLeaveThePlane = false;
         notifyAll();
-    }
+    } 
 }
