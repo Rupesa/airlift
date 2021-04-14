@@ -68,25 +68,13 @@ public class AEHostess extends Thread {
     @Override
     public void run(){
         System.out.println("------- Started Hostess activity -------");
-        while(!checkIfAllPassengersAreAttended()){
-            // estado inicial : WTFL
-            // falta: prepareForPassBoarding
-            // mudar de estado : WTFL -> WTPS
-            // falta: checkDocuments
-            // mudar de estado : WTPS -> CKPS
-            // falta: informPlaneReadyToTakeOff
-            // mudar de estado : CKPS -> RDTF
-            // falta: waitForNextFlight
-            // mudar de estado : RDTF -> WTFL
-            
+        while(!checkIfAllPassengersAreAttended()){            
             iDepartureAirport.waitForNextFlight();
-            // mudar de estado : 
             iDepartureAirport.waitForNextPassenger();
-            // mudar de estado : CKPS -> WTPS
-            iDepartureAirport.askForDocuments();        // nao esta no diagrama
-            iDepartureAirport.waitToCheckPassenger();   // nao esta no diagrama
+            iDepartureAirport.askForDocuments();
+            iDepartureAirport.waitToCheckPassenger();
             numberOfAttendedPassengers++;
-            iDepartureAirport.informPlaneReadyToFly();  // mudar nome para informPlaneReadyToTakeOff
+            iDepartureAirport.informPlaneReadyToFly();
         }
         System.out.println("-------- Ended Hostess activity --------");
     }

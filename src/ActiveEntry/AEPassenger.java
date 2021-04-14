@@ -89,18 +89,14 @@ public class AEPassenger extends Thread {
     public void run(){
         System.out.println("----- Started Passenger " + getPassengerId() + " activity -----");
         
-        goingToAirport();   // nao esta no diagrama
+        goingToAirport();
         iDepartureAirport.travelToAirport();
-        // estado inicial  : GTAP
         iDepartureAirport.waitInQueue();
-        // mudar de estado : GTAP -> INQE
         iDepartureAirport.showDocuments();
-        iDepartureAirport.waitToBeCheckedDocuments(); // nao esta no diagrama
+        iDepartureAirport.waitToBeCheckedDocuments();
         iPlane.boardThePlane();
-        // mudar de estado : INQE -> INFL 
         iPlane.waitForEndOfFlight();
         iPlane.leaveThePlane();
-        // mudar de estado : INFL -> ATDS
         iDestinatonAirport.leaveAirport();
         System.out.println("------ Ended Passenger " + getPassengerId() + " activity ------");
     }
