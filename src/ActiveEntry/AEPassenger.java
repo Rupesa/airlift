@@ -3,6 +3,7 @@ package ActiveEntry;
 import DepartureAirport.IDepartureAirport_Passenger;
 import DestinationAirport.IDestinationAirport_Passenger;
 import Plane.IPlane_Passenger;
+import genclass.GenericIO;
 
 /**
  *  Passenger thread.
@@ -27,7 +28,7 @@ public class AEPassenger extends Thread {
     *   Passenger state.
     */
     private int passengerState;
-    
+        
     /**
     *   Instantiation of a passenger thread.
     *
@@ -87,8 +88,7 @@ public class AEPassenger extends Thread {
     */
     @Override
     public void run(){
-        System.out.println("----- Started Passenger " + getPassengerId() + " activity -----");
-        
+        GenericIO.writelnString("----- Started Passenger " + getPassengerId() + " activity -----");
         goingToAirport();
         iDepartureAirport.travelToAirport();
         iDepartureAirport.waitInQueue();
@@ -97,7 +97,7 @@ public class AEPassenger extends Thread {
         iPlane.waitForEndOfFlight();
         iPlane.leaveThePlane();
         iDestinatonAirport.leaveAirport();
-        System.out.println("------ Ended Passenger " + getPassengerId() + " activity ------");
+        GenericIO.writelnString("------ Ended Passenger " + getPassengerId() + " activity ------");
     }
     
     /**
@@ -106,10 +106,12 @@ public class AEPassenger extends Thread {
     *  Internal operation.
     */
     private void goingToAirport (){
-        try{
-            sleep ((long) (1 + 20 * Math.random ()));
+        int randomSleepValue = (int) ((Math.random() * (10 - 5)) + 5);
+        try {
+            Thread.sleep(randomSleepValue*1000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        
     }
 }

@@ -1,6 +1,7 @@
 package ActiveEntry;
 
 import DepartureAirport.IDepartureAirport_Hostess;
+import genclass.GenericIO;
 
 /**
  *  Hostess thread.
@@ -34,7 +35,7 @@ public class AEHostess extends Thread {
     *   
     *   @param name thread name
     *   @param max maximum number of passengers
-    *   @param iDepartureAirport_Passenger reference to the Departure Airport
+    *   @param iDepartureAirport_Hostess reference to the Departure Airport
     */
     public AEHostess(String name, IDepartureAirport_Hostess iDepartureAirport_Hostess, int max){
         super(name);
@@ -67,7 +68,7 @@ public class AEHostess extends Thread {
     */
     @Override
     public void run(){
-        System.out.println("------- Started Hostess activity -------");
+        GenericIO.writelnString("------- Started Hostess activity -------");
         while(!checkIfAllPassengersAreAttended()){            
             iDepartureAirport.waitForNextFlight();
             iDepartureAirport.waitForNextPassenger();
@@ -75,7 +76,7 @@ public class AEHostess extends Thread {
             numberOfAttendedPassengers++;
             iDepartureAirport.informPlaneReadyToTakeOff();
         }
-        System.out.println("-------- Ended Hostess activity --------");
+        GenericIO.writelnString("-------- Ended Hostess activity --------");
     }
     
     public boolean checkIfAllPassengersAreAttended(){

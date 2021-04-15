@@ -106,7 +106,11 @@ public class AirLift_89293_89264 {
             }catch (InterruptedException e){
                 e.printStackTrace();                    
             }
+            
             GenericIO.writelnString ("The passenger " + (i+1) + " has terminated.");
+            if (i == 20){
+                repos.reportFinalStatus();
+            }
         }
         
         GenericIO.writelnString ();

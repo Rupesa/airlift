@@ -1,7 +1,14 @@
 package DestinationAirport;
 
 import GeneralRepository.GeneralRepos;
+import genclass.GenericIO;
 
+/**
+ *  Destination Airport.
+ *
+ *  Is implemented as an implicit monitor.
+ *  All public methods are executed in mutual exclusion.
+ */
 public class SRDestinationAirport implements IDestinationAirport_Passenger {
     
     // configurations
@@ -21,12 +28,16 @@ public class SRDestinationAirport implements IDestinationAirport_Passenger {
         this.repos = repos;
     }
         
-    //--------------------------------------------------------------------------
-    //                                 PASSENGER                               
-    //--------------------------------------------------------------------------
+    /* ****************************** PASSENGER ***************************** */
     
+    /**
+    *   The passenger leaves airport.
+    *   
+    *   It is called by a passenger.
+    */  
     @Override
     public synchronized void leaveAirport(){
+        GenericIO.writelnString("22 - Passenger leave airport");
         numberOfPassengersLeavingThePlane++;
     }
 }

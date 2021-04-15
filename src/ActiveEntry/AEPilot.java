@@ -3,6 +3,7 @@ package ActiveEntry;
 import DepartureAirport.IDepartureAirport_Pilot;
 import DepartureAirport.SRDepartureAirport;
 import Plane.IPlane_Pilot;
+import genclass.GenericIO;
 
 /**
  *  Pilot thread.
@@ -26,8 +27,8 @@ public class AEPilot extends Thread {
     *   Instantiation of a pilot thread.
     *   
     *   @param name thread name
-    *   @param iDepartureAirport_Passenger reference to the Departure Airport
-    *   @param iPlane_Passenger reference to the Plane 
+    *   @param iDepartureAirport_Pilot reference to the Departure Airport
+    *   @param iPlane_Pilot reference to the Plane 
     */
     public AEPilot(String name, IDepartureAirport_Pilot iDepartureAirport_Pilot, IPlane_Pilot iPlane_Pilot){
         super(name);
@@ -59,7 +60,7 @@ public class AEPilot extends Thread {
     */
     @Override
     public void run(){
-        System.out.println("-------- Started Pilot activity --------");
+        GenericIO.writelnString("-------- Started Pilot activity --------");
         while(!SRDepartureAirport.informPilotToEndActivity()){
             iDepartureAirport.informPlaneReadyForBoarding();
             iDepartureAirport.waitForAllInBoard();      
@@ -67,7 +68,7 @@ public class AEPilot extends Thread {
             iPlane.announceArrival();
             flyToDeparturePoint();
         }
-        System.out.println("--------- Ended Pilot activity ---------"); 
+        GenericIO.writelnString("--------- Ended Pilot activity ---------");
     }
     
     /**

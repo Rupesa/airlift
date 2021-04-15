@@ -19,7 +19,7 @@ public class SimulationParameters {
     *   Minimum number of passengers per flight.
     */
     public static final int MIN_PASSENGER = 5;
-
+    
     /**
     *   It can not be instantiated.
     */
