@@ -6,6 +6,7 @@ import ActiveEntry.AEPassenger;
 import ActiveEntry.AEPassengerStates;
 import ActiveEntry.AEPilot;
 import ActiveEntry.AEPilotStates;
+import DepartureAirport.SRDepartureAirport;
 import GeneralRepository.GeneralRepos;
 import airlift_89293_89264.SimulationParameters;
 import commInfra.MemException;
@@ -27,7 +28,6 @@ public class SRPlane implements IPlane_Pilot, IPlane_Passenger {
     /**
     *   Passenger queue on the plane.
     */
-//    private Queue<Integer> passengers;
     private MemFIFO<Integer> passengers;  
     
     private boolean lastPassengerLeaveThePlane;
@@ -44,20 +44,11 @@ public class SRPlane implements IPlane_Pilot, IPlane_Passenger {
     *   @param repos reference to the general repository
     */
     public SRPlane(int total, GeneralRepos repos){
-        //passengers = new LinkedList<>();
         try {
             passengers = new MemFIFO<>(new Integer[total+1]);
         } catch (MemException ex) {
             Logger.getLogger(SRDepartureAirport.class.getName()).log(Level.SEVERE, null, ex);
         }
-//        try{
-//            passengers = new MemFIFO<> (new Integer [SimulationParameters.TTL_PASSENGER]);
-//        }
-//        catch (MemException e){
-//            GenericIO.writelnString ("Instantiation of waiting FIFO failed: " + e.getMessage ());
-//            passengers = null;
-//            System.exit (1);
-//        }
         this.lastPassengerLeaveThePlane = false;
         this.pilotAnnounceArrival = false;
         this.repos = repos;
@@ -79,7 +70,6 @@ public class SRPlane implements IPlane_Pilot, IPlane_Passenger {
         } catch (MemException ex) {
             Logger.getLogger(SRPlane.class.getName()).log(Level.SEVERE, null, ex);
         }
-//        passengers.write(pass.getPassengerId());
         GenericIO.writelnString("16 - Passenger " + pass.getPassengerId() + " boarded the plane");  
         
         /* change state of passanger : INQE -> INFL */
@@ -115,9 +105,11 @@ public class SRPlane implements IPlane_Pilot, IPlane_Passenger {
         /* remove passenger from the queue of passangers */
         AEPassenger pass = (AEPassenger) Thread.currentThread();
         passengers.remove(pass.getPassengerId());
+        
         /* change state of passanger : INFL -> ATDS */
         pass.setPassengerState(AEPassengerStates.ATDS);
         repos.setPassengerState(pass.getPassengerId(), pass.getPassengerState());
+        
         GenericIO.writelnString("Passenger " + pass.getPassengerId() + " left the plane");  
         if (passengers.empty()){
             lastPassengerLeaveThePlane = true;
