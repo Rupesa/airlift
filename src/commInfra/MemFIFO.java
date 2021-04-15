@@ -51,8 +51,8 @@ public class MemFIFO<R> extends MemObject<R>{
             inPnt = (inPnt + 1) % mem.length;
             empty = false;
         }
-        else 
-            throw new MemException ("Fifo full!");
+        else
+            throw new MemException (inPnt+" - "+outPnt+" - "+(inPnt != outPnt)+" - Fifo full!");
    }
 
     /**
@@ -85,5 +85,42 @@ public class MemFIFO<R> extends MemObject<R>{
     */
     public boolean full (){
         return !((inPnt != outPnt) || empty);
+    }
+    
+    /**
+    *   Test FIFO current empty status.
+    *
+    *   @return true, if FIFO is empty -
+    *            false, otherwise
+    */
+    public boolean empty (){
+        return empty;
+    }
+    
+    public boolean contains(R val){
+        for (int i = outPnt; i < inPnt; i = (i + 1) % mem.length) {
+            if (mem[i].equals(val)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public void remove(R val){
+        boolean shift = false;
+        int i = outPnt;
+        int next;
+        for (int n = 0; n < mem.length-1; n++) {
+            next = (i + 1) % mem.length;
+            if (mem[i] != null && mem[i].equals(val)) {
+                shift = true;
+            }
+            if (shift){
+                mem[i] = mem[next];
+            }
+            i = next;
+        }
+        if (shift) inPnt = (inPnt - 1) % mem.length;
+        empty = (inPnt == outPnt);
     }
 }

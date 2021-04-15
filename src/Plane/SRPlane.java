@@ -1,6 +1,7 @@
 package Plane;
 
 import ActiveEntry.AEPassenger;
+import DepartureAirport.SRDepartureAirport;
 import GeneralRepository.GeneralRepos;
 import airlift_89293_89264.SimulationParameters;
 import commInfra.MemException;
@@ -8,6 +9,8 @@ import commInfra.MemFIFO;
 import genclass.GenericIO;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *  Plane.
@@ -20,8 +23,8 @@ public class SRPlane implements IPlane_Pilot, IPlane_Passenger {
     /**
     *   Passenger queue on the plane.
     */
-    private Queue<Integer> passengers;
-//    private MemFIFO<Integer> passengers;  
+//    private Queue<Integer> passengers;
+    private MemFIFO<Integer> passengers;  
     
     
     private boolean lastPassengerLeaveThePlane;
@@ -37,8 +40,13 @@ public class SRPlane implements IPlane_Pilot, IPlane_Passenger {
     *   
     *   @param repos reference to the general repository
     */
-    public SRPlane(GeneralRepos repos){
-        passengers = new LinkedList<>();
+    public SRPlane(int total, GeneralRepos repos){
+        //passengers = new LinkedList<>();
+        try {
+            passengers = new MemFIFO<>(new Integer[total+1]);
+        } catch (MemException ex) {
+            Logger.getLogger(SRDepartureAirport.class.getName()).log(Level.SEVERE, null, ex);
+        }
 //        try{
 //            passengers = new MemFIFO<> (new Integer [SimulationParameters.TTL_PASSENGER]);
 //        }
@@ -59,7 +67,11 @@ public class SRPlane implements IPlane_Pilot, IPlane_Passenger {
     @Override
     public synchronized void boardThePlane(){
         AEPassenger pass = (AEPassenger) Thread.currentThread();
-        passengers.add(pass.getPassengerId());
+        try {
+            passengers.write(pass.getPassengerId());
+        } catch (MemException ex) {
+            Logger.getLogger(SRPlane.class.getName()).log(Level.SEVERE, null, ex);
+        }
 //        passengers.write(pass.getPassengerId());
         GenericIO.writelnString("Passenger " + pass.getPassengerId() + " boarded the plane");  
     }
@@ -81,7 +93,7 @@ public class SRPlane implements IPlane_Pilot, IPlane_Passenger {
         AEPassenger pass = (AEPassenger) Thread.currentThread();
         passengers.remove(pass.getPassengerId());
         GenericIO.writelnString("Passenger " + pass.getPassengerId() + " left the plane");  
-        if (passengers.size() == 0){
+        if (passengers.empty()){
             lastPassengerLeaveThePlane = true;
             notifyAll();
             GenericIO.writelnString("Passenger " + pass.getPassengerId() + " notified the pilot that he is the last");  

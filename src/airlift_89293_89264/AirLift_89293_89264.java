@@ -67,9 +67,9 @@ public class AirLift_89293_89264 {
 
         /* instantiation shared region */
         repos = new GeneralRepos (fileName);
-        srDepartureAirport = new SRDepartureAirport(SimulationParameters.MIN_PASSENGER, SimulationParameters.MAX_PASSENGER, repos);
+        srDepartureAirport = new SRDepartureAirport(SimulationParameters.MIN_PASSENGER, SimulationParameters.MAX_PASSENGER, SimulationParameters.TTL_PASSENGER, repos);
         srDestinationAirport = new SRDestinationAirport(repos);
-        srPlane = new SRPlane(repos);
+        srPlane = new SRPlane(SimulationParameters.TTL_PASSENGER, repos);
         
         /* instantiation to the active entities */
         aeHostess = new AEHostess("Hostess", (IDepartureAirport_Hostess) srDepartureAirport, SimulationParameters.TTL_PASSENGER);

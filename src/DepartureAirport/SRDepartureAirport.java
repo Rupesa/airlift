@@ -3,14 +3,18 @@ package DepartureAirport;
 import ActiveEntry.AEHostess;
 import ActiveEntry.AEPassenger;
 import GeneralRepository.GeneralRepos;
+import commInfra.MemException;
+import commInfra.MemFIFO;
 import genclass.GenericIO;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class SRDepartureAirport implements IDepartureAirport_Pilot, IDepartureAirport_Hostess, IDepartureAirport_Passenger {
     
     // configurations
-    private Queue<Integer> passengers;
+    private MemFIFO<Integer> passengers;
     private int MAX_PASSENGER;
     private int MIN_PASSENGER;
     private int numberOfPassengerOnThePlane;
@@ -34,8 +38,12 @@ public class SRDepartureAirport implements IDepartureAirport_Pilot, IDepartureAi
     *   @param max maximum number of passengers per flight
     *   @param repos reference to the general repository
     */
-    public SRDepartureAirport(int min, int max, GeneralRepos repos){
-        passengers = new LinkedList<>();
+    public SRDepartureAirport(int min, int max,int total, GeneralRepos repos){
+        try {
+            passengers = new MemFIFO<>(new Integer[total+1]);
+        } catch (MemException ex) {
+            Logger.getLogger(SRDepartureAirport.class.getName()).log(Level.SEVERE, null, ex);
+        }
         this.MIN_PASSENGER = min;
         this.MAX_PASSENGER = max;
         numberOfPassengerOnThePlane = 0;
@@ -69,7 +77,7 @@ public class SRDepartureAirport implements IDepartureAirport_Pilot, IDepartureAi
     public synchronized void waitForNextPassenger(){
         notifyAll();
         int next;
-        while(passengers.size() == 0){
+        while(passengers.empty()){
             GenericIO.writelnString("Hostess is waiting for passengers");
             try {
                 wait();
@@ -77,7 +85,12 @@ public class SRDepartureAirport implements IDepartureAirport_Pilot, IDepartureAi
                 e.printStackTrace();
             }
         }
-        next = passengers.remove();
+        try {
+            next = passengers.read();
+            System.out.println(next);
+        } catch (MemException ex) {
+            Logger.getLogger(SRDepartureAirport.class.getName()).log(Level.SEVERE, null, ex);
+        }
         notifyAll();
         GenericIO.writelnString("Hostess accepted a passenger for check in");
     }
@@ -103,7 +116,7 @@ public class SRDepartureAirport implements IDepartureAirport_Pilot, IDepartureAi
     @Override
     public synchronized void informPlaneReadyToTakeOff(){
         AEHostess hostess = (AEHostess) Thread.currentThread();
-        if((passengers.size() == 0 && numberOfPassengerOnThePlane > MIN_PASSENGER) || numberOfPassengerOnThePlane == MAX_PASSENGER || (passengers.size() == 0 && hostess.checkIfAllPassengersAreAttended())){
+        if((passengers.empty() && numberOfPassengerOnThePlane > MIN_PASSENGER) || numberOfPassengerOnThePlane == MAX_PASSENGER || (passengers.empty() && hostess.checkIfAllPassengersAreAttended())){
             hostessInformPlaneReadyToTakeOff = true;
             if (hostess.checkIfAllPassengersAreAttended()){
                 hostessInformPilotToEndActivity = true;
@@ -130,7 +143,11 @@ public class SRDepartureAirport implements IDepartureAirport_Pilot, IDepartureAi
     @Override
     public synchronized void travelToAirport(){
         AEPassenger pass = (AEPassenger) Thread.currentThread();
-        passengers.add(pass.getPassengerId());
+        try {
+            passengers.write(pass.getPassengerId());
+        } catch (MemException ex) {
+            Logger.getLogger(SRDepartureAirport.class.getName()).log(Level.SEVERE, null, ex);
+        }
         notifyAll();
         GenericIO.writelnString("Passenger " + pass.getPassengerId() + " go to airport");
     }
