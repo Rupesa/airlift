@@ -68,15 +68,15 @@ public class AEHostess extends Thread {
     */
     @Override
     public void run(){
-        GenericIO.writelnString("------- Started Hostess activity -------");
+        GenericIO.writelnString("Started Hostess activity");
         while(!checkIfAllPassengersAreAttended()){            
             iDepartureAirport.waitForNextFlight();
             iDepartureAirport.waitForNextPassenger();
-            iDepartureAirport.waitToCheckPassenger();
+            iDepartureAirport.checkDocuments();
             numberOfAttendedPassengers++;
             iDepartureAirport.informPlaneReadyToTakeOff();
         }
-        GenericIO.writelnString("-------- Ended Hostess activity --------");
+        GenericIO.writelnString("Ended Hostess activity");
     }
     
     public boolean checkIfAllPassengersAreAttended(){

@@ -88,7 +88,7 @@ public class AEPassenger extends Thread {
     */
     @Override
     public void run(){
-        GenericIO.writelnString("----- Started Passenger " + getPassengerId() + " activity -----");
+        GenericIO.writelnString("Started Passenger " + getPassengerId() + " activity");
         goingToAirport();
         iDepartureAirport.travelToAirport();
         iDepartureAirport.waitInQueue();
@@ -97,7 +97,7 @@ public class AEPassenger extends Thread {
         iPlane.waitForEndOfFlight();
         iPlane.leaveThePlane();
         iDestinatonAirport.leaveAirport();
-        GenericIO.writelnString("------ Ended Passenger " + getPassengerId() + " activity ------");
+        GenericIO.writelnString("Ended Passenger " + getPassengerId() + " activity");
     }
     
     /**

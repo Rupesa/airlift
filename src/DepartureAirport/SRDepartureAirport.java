@@ -9,10 +9,7 @@ import ActiveEntry.AEPilotStates;
 import GeneralRepository.GeneralRepos;
 import commInfra.MemFIFO;
 import commInfra.MemException;
-import airlift_89293_89264.SimulationParameters;
 import genclass.GenericIO;
-import java.util.LinkedList;
-import java.util.Queue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -24,15 +21,13 @@ import java.util.logging.Logger;
  */
 public class SRDepartureAirport implements IDepartureAirport_Pilot, IDepartureAirport_Hostess, IDepartureAirport_Passenger {
     
-    // configurations
+    /* initial configurations */
     private MemFIFO<Integer> passengers;
     private int MAX_PASSENGER;
     private int MIN_PASSENGER;
     private int numberOfPassengerOnThePlane;
     private int numberOfFilght;
     private boolean passengerShowingDocuments;
-    private boolean passengerChekedIn;
-    private boolean hostessWaitingForNextPassenger;
     private boolean hostessAsksPassengerForDocuments;
     private boolean hostessInformPlaneReadyToTakeOff;
     private static boolean hostessInformPilotToEndActivity;
@@ -61,8 +56,6 @@ public class SRDepartureAirport implements IDepartureAirport_Pilot, IDepartureAi
         numberOfPassengerOnThePlane = 0;
         numberOfFilght = 0;
         passengerShowingDocuments = false;
-        passengerChekedIn = false;
-        hostessWaitingForNextPassenger = true;
         hostessAsksPassengerForDocuments = false;
         hostessInformPlaneReadyToTakeOff = false;
         hostessInformPilotToEndActivity = false;
@@ -79,20 +72,20 @@ public class SRDepartureAirport implements IDepartureAirport_Pilot, IDepartureAi
     */
     @Override
     public synchronized void waitForNextFlight(){
+        /* change state of hostess to WTFL */
+        AEHostess hostess = (AEHostess) Thread.currentThread();
+        hostess.setHostessState(AEHostessStates.WTFL);
+        repos.setHostessState(hostess.getHostessState());
+        
         /* wait for the pilot to notify that he is ready to board */
         while(!pilotInformPlaneReadyForBoarding){
-            GenericIO.writelnString("1 - Hostess is waiting for the next flight to be ready to be boarded");
+            GenericIO.writelnString("(01) Hostess is waiting for the next flight to be ready to be boarded");
             try {
                 wait();
             } catch (InterruptedException e){
                 e.printStackTrace();
             }
         }
-        
-        /* change state of hostess : RDTF -> WTFL */
-        AEHostess hostess = (AEHostess) Thread.currentThread();
-        hostess.setHostessState(AEHostessStates.WTFL);
-        repos.setHostessState(hostess.getHostessState());
     }
     
     /**
@@ -103,10 +96,19 @@ public class SRDepartureAirport implements IDepartureAirport_Pilot, IDepartureAi
     */
     @Override
     public synchronized void waitForNextPassenger(){
+
+        
+        /* waiting for passengers */ 
         notifyAll();
         int next;
         while(passengers.empty()){
-            GenericIO.writelnString("Hostess is waiting for passengers");
+            GenericIO.writelnString("(02) Hostess is waiting for passengers");
+                    /* change state of hostess to WTPS */
+        AEHostess hostess = (AEHostess) Thread.currentThread();
+        hostess.setHostessState(AEHostessStates.WTPS);
+        repos.setHostessState(hostess.getHostessState());
+            
+            
             try {
                 wait();
             } catch (InterruptedException e){
@@ -115,17 +117,11 @@ public class SRDepartureAirport implements IDepartureAirport_Pilot, IDepartureAi
         }
         try {
             next = passengers.read();
-            System.out.println(next);
         } catch (MemException ex) {
             Logger.getLogger(SRDepartureAirport.class.getName()).log(Level.SEVERE, null, ex);
         }
         notifyAll();
-        GenericIO.writelnString("3 - Hostess accepted a passenger for check in");
-        
-        /* change state of hostess : CKPS -> WTPS */
-        AEHostess hostess = (AEHostess) Thread.currentThread();
-        hostess.setHostessState(AEHostessStates.WTPS);
-        repos.setHostessState(hostess.getHostessState());
+        GenericIO.writelnString("(03) Hostess accepted a passenger for check in");
     }
     
     /**
@@ -135,15 +131,20 @@ public class SRDepartureAirport implements IDepartureAirport_Pilot, IDepartureAi
     *   It is called by a hostess.
     */
     @Override
-    public synchronized void waitToCheckPassenger(){
+    public synchronized void checkDocuments(){
+        /* change state of hostess to CKPS */
+        AEHostess hostess = (AEHostess) Thread.currentThread();
+        hostess.setHostessState(AEHostessStates.CKPS);
+        repos.setHostessState(hostess.getHostessState());
+        
         /* ask for documents from the passenger */
-        GenericIO.writelnString("4 - Hostess asked passenger for documents");
+        GenericIO.writelnString("(04) Hostess asked passenger for documents");
         hostessAsksPassengerForDocuments = true;
         notifyAll();
         
         /* wait for the passenger to show the documents */
         while(!passengerShowingDocuments){
-            GenericIO.writelnString("5 - Hostess is waiting for passenger to give documents");
+            GenericIO.writelnString("(05) Hostess is waiting for passenger to give documents");
             try {
                 wait();
             } catch (InterruptedException e){
@@ -151,13 +152,10 @@ public class SRDepartureAirport implements IDepartureAirport_Pilot, IDepartureAi
             }
         }
         passengerShowingDocuments = false;
-        GenericIO.writelnString("6 - Hostess received and accepted documents");
+        GenericIO.writelnString("(06) Hostess received and accepted documents");
         numberOfPassengerOnThePlane++;
         
-        /* change state of hostess : WTPS -> CKPS */
-        AEHostess hostess = (AEHostess) Thread.currentThread();
-        hostess.setHostessState(AEHostessStates.CKPS);
-        repos.setHostessState(hostess.getHostessState());
+        
     }
     
     /**
@@ -176,10 +174,14 @@ public class SRDepartureAirport implements IDepartureAirport_Pilot, IDepartureAi
             hostessInformPlaneReadyToTakeOff = true;
             if (hostess.checkIfAllPassengersAreAttended()){
                 hostessInformPilotToEndActivity = true;
-                GenericIO.writelnString("7 - Hostess informs pilot that he can end activity");
+                GenericIO.writelnString("(07) Hostess informs pilot that he can end activity");
             }
             notifyAll();
-            GenericIO.writelnString("8 - Hostess informs plane is ready to fly");
+            GenericIO.writelnString("(08) Hostess informs plane is ready to fly");
+            
+            /* change state of hostess to RDTF */
+            hostess.setHostessState(AEHostessStates.RDTF);
+            repos.setHostessState(hostess.getHostessState());
             
             /* wait for the pilot to report that he is ready to board */
             while(pilotInformPlaneReadyForBoarding){
@@ -192,9 +194,7 @@ public class SRDepartureAirport implements IDepartureAirport_Pilot, IDepartureAi
             numberOfPassengerOnThePlane = 0;
             hostessInformPlaneReadyToTakeOff = false;
             
-            /* change state of hostess : WTPS -> RDTF */
-            hostess.setHostessState(AEHostessStates.RDTF);
-            repos.setHostessState(hostess.getHostessState());
+
         }
     }
     
@@ -215,7 +215,7 @@ public class SRDepartureAirport implements IDepartureAirport_Pilot, IDepartureAi
             Logger.getLogger(SRDepartureAirport.class.getName()).log(Level.SEVERE, null, ex);
         }
         notifyAll();
-        GenericIO.writelnString("9 - Passenger " + pass.getPassengerId() + " go to airport");
+        GenericIO.writelnString("(09) Passenger " + pass.getPassengerId() + " go to airport");
     }
     
     /**
@@ -227,7 +227,12 @@ public class SRDepartureAirport implements IDepartureAirport_Pilot, IDepartureAi
     public synchronized void waitInQueue(){
         /* wait in line until the hostess starts checking in */
         AEPassenger pass = (AEPassenger) Thread.currentThread();
-        GenericIO.writelnString("10 - Passenger " + pass.getPassengerId() + " is waiting in queue");
+        
+        /* change state of passenger to INQE */
+        pass.setPassengerState(AEPassengerStates.INQE);
+        repos.setPassengerState(pass.getPassengerId(), pass.getPassengerState());
+        
+        GenericIO.writelnString("(10) Passenger " + pass.getPassengerId() + " is waiting in queue");
         while(passengers.contains(pass.getPassengerId())){
             try {
                 wait();
@@ -235,10 +240,6 @@ public class SRDepartureAirport implements IDepartureAirport_Pilot, IDepartureAi
                 e.printStackTrace();
             }
         }
-        
-        /* change state of passenger : GTAP -> INQE */
-        pass.setPassengerState(AEPassengerStates.INQE);
-        repos.setPassengerState(pass.getPassengerId(), pass.getPassengerState());
     }
     
     /**
@@ -249,7 +250,7 @@ public class SRDepartureAirport implements IDepartureAirport_Pilot, IDepartureAi
     @Override
     public synchronized void showDocuments(){
         /* wait for the hostess to ask you for the documents */
-        GenericIO.writelnString("11 - Passenger is being asked for documents");
+        GenericIO.writelnString("(11) Passenger is being asked for documents");
         while(!hostessAsksPassengerForDocuments){
             try {
                 wait();
@@ -258,7 +259,7 @@ public class SRDepartureAirport implements IDepartureAirport_Pilot, IDepartureAi
             }
         }
         passengerShowingDocuments = true;
-        GenericIO.writelnString("12 - Passenger showed documents");
+        GenericIO.writelnString("(12) Passenger showed documents");
         notifyAll();
     }
 
@@ -271,15 +272,18 @@ public class SRDepartureAirport implements IDepartureAirport_Pilot, IDepartureAi
     */
     @Override
     public synchronized void informPlaneReadyForBoarding(){
-        /* wait for the hostess to notify you that the plane is ready to take off */
-        GenericIO.writelnString("13 - Pilot informed plane is ready to be boarded");
-        pilotInformPlaneReadyForBoarding = true;
-        notifyAll();
-        
-        /* change state of pilot : ATRG -> RDFB */
+        /* increment flight */
+        numberOfFilght++;
+
+        /* change state of pilot to RDFB */
         AEPilot pilot = (AEPilot) Thread.currentThread();
         pilot.setPilotState(AEPilotStates.RDFB);
         repos.setPilotState(pilot.getPilotState());
+
+        /* wait for the hostess to notify you that the plane is ready to take off */
+        GenericIO.writelnString("(13) Pilot informed plane is ready to be boarded");
+        pilotInformPlaneReadyForBoarding = true;
+        notifyAll();
     }
     
     /**
@@ -289,8 +293,13 @@ public class SRDepartureAirport implements IDepartureAirport_Pilot, IDepartureAi
     */
     @Override
     public synchronized void waitForAllInBoard(){
+        /* change state of pilot to WTFB */
+        AEPilot pilot = (AEPilot) Thread.currentThread();
+        pilot.setPilotState(AEPilotStates.WTFB);
+        repos.setPilotState(pilot.getPilotState());
+        
         /* wait for the hostess to notify you that the plane is ready to take off */
-        GenericIO.writelnString("14 - Pilot is waiting for the boarding to be finished");
+        GenericIO.writelnString("(14) Pilot is waiting for the boarding to be finished");
         while(!hostessInformPlaneReadyToTakeOff){
             try {
                 wait();
@@ -300,19 +309,13 @@ public class SRDepartureAirport implements IDepartureAirport_Pilot, IDepartureAi
         }
         pilotInformPlaneReadyForBoarding = false;
         notifyAll(); 
-        GenericIO.writelnString("15 - Boarding is finished and pilot is going to fly ----------------------- " + numberOfPassengerOnThePlane);
-        
+        GenericIO.writelnString("(15) Boarding is finished and pilot is going to fly");
+
         /* set information of flight */
-        numberOfFilght++;
         repos.setInfoBoardPlane(numberOfFilght, numberOfPassengerOnThePlane);
-        
-        /* change state of pilot : RDFB -> WTFB */
-        AEPilot pilot = (AEPilot) Thread.currentThread();
-        pilot.setPilotState(AEPilotStates.WTFB);
-        repos.setPilotState(pilot.getPilotState());
+        GenericIO.writelnString("----------------------- FLIGHT: " + numberOfFilght + " --- Passengers on flight " + numberOfFilght + ": " + numberOfPassengerOnThePlane);
     }
-    
-    
+      
     public static synchronized boolean informPilotToEndActivity(){
         return hostessInformPilotToEndActivity;
     }

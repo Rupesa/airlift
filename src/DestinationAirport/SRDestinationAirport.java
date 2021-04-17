@@ -37,7 +37,7 @@ public class SRDestinationAirport implements IDestinationAirport_Passenger {
     */  
     @Override
     public synchronized void leaveAirport(){
-        GenericIO.writelnString("22 - Passenger leave airport");
+        GenericIO.writelnString("(26) Passenger leave airport");
         numberOfPassengersLeavingThePlane++;
     }
 }

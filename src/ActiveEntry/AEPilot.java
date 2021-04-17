@@ -60,40 +60,15 @@ public class AEPilot extends Thread {
     */
     @Override
     public void run(){
-        GenericIO.writelnString("-------- Started Pilot activity --------");
+        GenericIO.writelnString("Started Pilot activity");
         while(!SRDepartureAirport.informPilotToEndActivity()){
             iDepartureAirport.informPlaneReadyForBoarding();
             iDepartureAirport.waitForAllInBoard();      
-            flyToDestinationPoint();        
+            iPlane.flyToDestinationPoint();
             iPlane.announceArrival();
-            flyToDeparturePoint();
+            iPlane.flyToDeparturePoint();
+            iPlane.parkAtTransferGate();
         }
-        GenericIO.writelnString("--------- Ended Pilot activity ---------");
-    }
-    
-    /**
-    *  The pilot flies to destination airport.
-    *
-    *  Internal operation.
-    */
-    private void flyToDestinationPoint (){
-        try{
-            sleep ((long) (1 + 20 * Math.random ()));
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-    *  The pilot flies to departure airport.
-    *
-    *  Internal operation.
-    */
-    private void flyToDeparturePoint (){
-        try{
-            sleep ((long) (1 + 20 * Math.random ()));
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        GenericIO.writelnString("Ended Pilot activity");
     }
 }
