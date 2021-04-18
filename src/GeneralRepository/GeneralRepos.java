@@ -28,28 +28,26 @@ public class GeneralRepos {
     */
     private int numOfFlight;
     private int flight;
-    private int numOfPassengersOnFlight;
-    private int numPass;
+    private int currentPassenger;
     private String [] voos;
         
     /**
     *   State of the pilot.
     */
     private int pilotState;
-    private int previousPilotState;
+    private int lastPilotReportedState;
     
     /**
     *   State of the hostess.
     */
     private int hostessState;
-    private int previousHostessState;
+    private int lastHostessReportedState;
     
     /**
     *   State of the passengers.
     */
     private final int [] passengerState;
-    private int [] previousPassengerState;
-    private int idPass;
+    private int [] lastPassengerReportedState;
         
     /**
     *   Number of passengers presently forming a queue to board the plane.
@@ -79,23 +77,22 @@ public class GeneralRepos {
             this.logFileName = logFileName;
         } 
         pilotState = AEPilotStates.ATGR;
-        previousPilotState = pilotState;
+        lastPilotReportedState = 0;
+        currentPassenger = 0;
         hostessState = AEHostessStates.WTFL;
-        previousHostessState = hostessState;
+        lastHostessReportedState = 0;
         passengerState = new int [SimulationParameters.TTL_PASSENGER];
-        previousPassengerState = new int [SimulationParameters.TTL_PASSENGER];
+        lastPassengerReportedState = new int [SimulationParameters.TTL_PASSENGER];
         for (int i = 0; i < passengerState.length; i++){
             passengerState[i] = AEPassengerStates.GTAP;
-            previousPassengerState[i] = passengerState[i];
+            lastPassengerReportedState[i] = 0;
         }
         reportInitialStatus ();
         this.inQ = 0;
         this.inF = 0;
         this.pTAL = 0;
         voos = new String[6];
-        this.idPass = 0;
         this.flight = 1;
-        this.numPass = 0;
     }
     
     /**
@@ -106,8 +103,7 @@ public class GeneralRepos {
     */
     public synchronized void setInfoBoardPlane(int nFlight, int nPassengers){
         this.numOfFlight = nFlight;
-        this.numOfPassengersOnFlight = nPassengers;
-        voos[numOfFlight-1] = numOfFlight + "-" + numOfPassengersOnFlight; 
+        voos[numOfFlight-1] = numOfFlight + "-" + nPassengers; 
     }
         
     /**
@@ -116,7 +112,7 @@ public class GeneralRepos {
     *   @param state pilot state
     */
     public synchronized void setPilotState (int state){
-        previousPilotState = pilotState;
+//        previousPilotState = pilotState;
         pilotState = state;
         reportStatus ();
     }
@@ -126,9 +122,9 @@ public class GeneralRepos {
     *
     *   @param state hostess state
     */
-    public synchronized void setHostessState (int state){
-        previousHostessState = hostessState;
+    public synchronized void setHostessState (int passengerID,int state){
         hostessState = state;
+        currentPassenger = passengerID;
         reportStatus ();
     }
     
@@ -139,27 +135,10 @@ public class GeneralRepos {
     *   @param state passenger state
     */
     public synchronized void setPassengerState (int id, int state){    
-        previousPassengerState[id] = passengerState[id];
         passengerState[id] = state;
-        idPass = id;
         reportStatus ();
     }
-    
-    /**
-    *   Set pilot, hosstess and passenger state.
-    *   
-    *   @param pilotState pilot state
-    *   @param hostessState hostess state
-    *   @param passengerId passenger id
-    *   @param passengerState passenger state
-    */
-    public synchronized void setPilotHostessPassengerState (int pilotState, int hostessState, int passengerId, int passengerState){
-        this.pilotState = pilotState;
-        this.hostessState = hostessState;
-        this.passengerState[passengerId] = passengerState;
-        reportStatus ();
-    }
-    
+        
     /**
     *   Write the header to the logging file.
     *
@@ -199,118 +178,90 @@ public class GeneralRepos {
             GenericIO.writelnString ("The operation of opening for appending the file " + logFileName + " failed!");
             System.exit (1);
         }
-         
-        /* print status of entities */
-//        switch (pilotState){
-//            case AEPilotStates.ATGR:    lineStatus += " ATGR ";
-//                                        break;
-//            case AEPilotStates.RDFB:    lineStatus += " RDFB ";
-//                                        break;
-//            case AEPilotStates.WTFB:    lineStatus += " WTFB ";
-//                                        break;
-//            case AEPilotStates.FLFW:    lineStatus += " FLFW ";
-//                                        break;
-//            case AEPilotStates.DRPP:    lineStatus += " DRPP ";
-//                                        break;
-//            case AEPilotStates.FLBK:    lineStatus += " FLBK ";
-//                                        break;
-//        }
-//        switch (hostessState){
-//            case AEHostessStates.WTFL:  lineStatus += " WTFL ";
-//                                        break;
-//            case AEHostessStates.WTPS:  lineStatus += " WTPS ";
-//                                        break;
-//            case AEHostessStates.CKPS:  lineStatus += " CKPS ";    
-//                                        break;
-//            case AEHostessStates.RDTF:  lineStatus += " RDTF ";
-//                                        break;
-//        }
-//        for (int i = 0; i < SimulationParameters.TTL_PASSENGER; i++){
-//            switch (passengerState[i]){
-//                case AEPassengerStates.GTAP:    lineStatus += " GTAP ";
-//                                                break;
-//                case AEPassengerStates.INQE:    lineStatus += " INQE ";
-//                                                break;
-//                case AEPassengerStates.INFL:    lineStatus += " INFL ";
-//                                                break;
-//                case AEPassengerStates.ATDS:    lineStatus += " ATDS ";
-//                                                break;
-//            }
-//        }
-        
+                 
         /* check pilot state */
         if (pilotState == AEPilotStates.ATGR){
             lineStatus += " ATGR ";
         } else if (pilotState == AEPilotStates.RDFB){
             /* check and print flight status : BOARDING STARTED */
-            if (previousPilotState == AEPilotStates.ATGR){
-                log.writelnString ("\n Flight " + flight + ": boarding started.");
-            }
             lineStatus += " RDFB ";
+            log.writelnString ("\n Flight " + flight + ": boarding started.");
+            lastPilotReportedState = AEPilotStates.RDFB;
         } else if (pilotState == AEPilotStates.WTFB){
             lineStatus += " WTFB ";
+            lastPilotReportedState = AEPilotStates.WTFB;
         } else if (pilotState == AEPilotStates.FLFW){
             lineStatus += " FLFW ";
+            lastPilotReportedState = AEPilotStates.FLFW;
         } else if (pilotState == AEPilotStates.DRPP){
             /* check and print flight status : ARRIVED */
-            if(previousPilotState == AEPilotStates.FLFW){
+            if(lastPilotReportedState == AEPilotStates.FLFW){
                 log.writelnString ("\n Flight " + flight + ": arrived.");
             }
             lineStatus += " DRPP ";
+            lastPilotReportedState = AEPilotStates.DRPP;
         } else if (pilotState == AEPilotStates.FLBK){
             /* check and print flight status : RETURNING */
-            if(previousPilotState == AEPilotStates.DRPP){
+            if(lastPilotReportedState == AEPilotStates.DRPP){
                 log.writelnString ("\n Flight " + flight + ": returning."); 
                 flight++;
             }      
             lineStatus += " FLBK ";
+            lastPilotReportedState = AEPilotStates.FLBK;
         }
         
         /* check hostess state */
         if (hostessState == AEHostessStates.WTFL){
             lineStatus += " WTFL ";
+            lastHostessReportedState = AEHostessStates.WTFL;
         } else if (hostessState == AEHostessStates.WTPS){
             lineStatus += " WTPS ";
+            lastHostessReportedState = AEHostessStates.WTPS;
         } else if (hostessState == AEHostessStates.CKPS){
             /* check and print flight status : PASSENGER _ CHECKED */
-            if (previousHostessState == AEHostessStates.WTPS){
-                log.writelnString ("\n Flight " + flight + ": passenger " + idPass + " checked.");
-                numPass++;
+            if (lastHostessReportedState == AEHostessStates.WTPS){
+                log.writelnString ("\n Flight " + flight + ": passenger " + currentPassenger + " checked.");
                 inQ--;
             }
             lineStatus += " CKPS ";
+            lastHostessReportedState = AEHostessStates.CKPS;
         } else if (hostessState == AEHostessStates.RDTF){
             /* check and print flight status : DEPARTED WITH _ PASSENGERS */
-            if (previousHostessState == AEHostessStates.WTPS){
-                log.writelnString ("\n Flight " + flight + ": departed with " + numOfPassengersOnFlight + " passengers.");
+            if (lastHostessReportedState == AEHostessStates.WTPS){
+                log.writelnString ("\n Flight " + flight + ": departed with " + inF + " passengers.");
             }
             lineStatus += " RDTF ";
+            lastHostessReportedState = AEHostessStates.RDTF;
         }
         
         /* check passenger state */
         for (int i = 0; i < SimulationParameters.TTL_PASSENGER; i++){
             if (passengerState[i] == AEPassengerStates.GTAP){
                 lineStatus += " GTAP ";
+                lastPassengerReportedState[i] = AEPassengerStates.GTAP;
             } else if (passengerState[i] == AEPassengerStates.INQE){
-                if (previousPassengerState[i] == AEPassengerStates.GTAP){
+                if (lastPassengerReportedState[i] == AEPassengerStates.GTAP){
                     inQ++;
                 } 
                 lineStatus += " INQE ";
+                lastPassengerReportedState[i] = AEPassengerStates.INQE;
             } else if (passengerState[i] == AEPassengerStates.INFL){
-                if (previousPassengerState[i] == AEPassengerStates.INQE){
+                if (lastPassengerReportedState[i] == AEPassengerStates.INQE){
                     inF++;
                 } 
                 lineStatus += " INFL ";
+                lastPassengerReportedState[i] = AEPassengerStates.INFL;
             } else if (passengerState[i] == AEPassengerStates.ATDS){
-                if (previousPassengerState[i] == AEPassengerStates.INFL){
+                if (lastPassengerReportedState[i] == AEPassengerStates.INFL){
                     inF--;
                     pTAL++;
                 }
                 lineStatus += " ATDS ";
+                lastPassengerReportedState[i] = AEPassengerStates.ATDS;
             }
         }
                 
-        lineStatus += "   " + inQ + "     " + inF + "    " + pTAL;
+        lineStatus += String.format(" %3d   %3d  %3d", inQ, inF, pTAL);
         log.writelnString (lineStatus);
           
         if (!log.close ()){ 

@@ -112,6 +112,5 @@ public class AEPassenger extends Thread {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        
     }
 }

@@ -37,6 +37,7 @@ public class SRPlane implements IPlane_Pilot, IPlane_Passenger {
     /**
     *   Plane instantiation.
     *   
+    *   @param total number of passengers
     *   @param repos reference to the general repository
     */
     public SRPlane(int total, GeneralRepos repos){
@@ -59,21 +60,18 @@ public class SRPlane implements IPlane_Pilot, IPlane_Passenger {
     */   
     @Override
     public synchronized void boardThePlane(){
-        /* add passenger to the queue of passengers */
+        /* change state of passanger to INFL */
         AEPassenger pass = (AEPassenger) Thread.currentThread();
-        
-         /* change state of passanger to INFL */
         pass.setPassengerState(AEPassengerStates.INFL);
         repos.setPassengerState(pass.getPassengerId(), pass.getPassengerState());
         
+        /* add passenger to the queue of passengers */
         try {
             passengers.write(pass.getPassengerId());
         } catch (MemException ex) {
             Logger.getLogger(SRPlane.class.getName()).log(Level.SEVERE, null, ex);
         }
         GenericIO.writelnString("(16) Passenger " + pass.getPassengerId() + " boarded the plane");  
-        
-       
     }
     
     /**
@@ -150,8 +148,6 @@ public class SRPlane implements IPlane_Pilot, IPlane_Passenger {
         pilotAnnounceArrival = false;
         lastPassengerLeaveThePlane = false;
         notifyAll();
-        
-        
     } 
     
     /**
@@ -173,8 +169,6 @@ public class SRPlane implements IPlane_Pilot, IPlane_Passenger {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        
-
     } 
     
     /**
@@ -196,8 +190,6 @@ public class SRPlane implements IPlane_Pilot, IPlane_Passenger {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        
-
     } 
     
     /**
@@ -219,6 +211,5 @@ public class SRPlane implements IPlane_Pilot, IPlane_Passenger {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-       
     } 
 }
