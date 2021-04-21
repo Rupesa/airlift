@@ -119,12 +119,13 @@ public class GeneralRepos {
     
     /**
     *   Set hostess state.
-    *
+    *   
+    *   @param id id passenger
     *   @param state hostess state
     */
-    public synchronized void setHostessState (int passengerID,int state){
+    public synchronized void setHostessState (int id,int state){
         hostessState = state;
-        currentPassenger = passengerID;
+        currentPassenger = id;
         reportStatus ();
     }
     

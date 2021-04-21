@@ -44,6 +44,7 @@ public class SRDepartureAirport implements IDepartureAirport_Pilot, IDepartureAi
      *
      * @param min minimum number of passengers per flight
      * @param max maximum number of passengers per flight
+     * @param total total number of passengers per flight
      * @param repos reference to the general repository
      */
     public SRDepartureAirport(int min, int max, int total, GeneralRepos repos) {
