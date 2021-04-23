@@ -329,8 +329,10 @@ public class SRDepartureAirport implements IDepartureAirport_Pilot, IDepartureAi
      * The pilot stops his activity when the hostess tells him to.
      *
      * It is called by a pilot.
+     * 
+     * @return the value of the hostessInformPilotToEndActivity variable
      */
-    public static synchronized boolean informPilotToEndActivity() {
+    public synchronized boolean informPilotToEndActivity() {
         return hostessInformPilotToEndActivity;
     }
 
