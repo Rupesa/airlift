@@ -68,7 +68,7 @@ public class SRDepartureAirport implements IDepartureAirport_Pilot, IDepartureAi
 
     /* ******************************* HOSTESS ****************************** */
     /**
-     * The hostess waits that the next flight is ready to be boarded.
+     * The hostess waits for the next flight to be ready for boarding.
      *
      * It is called by a hostess.
      */
@@ -94,7 +94,7 @@ public class SRDepartureAirport implements IDepartureAirport_Pilot, IDepartureAi
 
     /**
      * The hostess waits for the next passenger in the queue. When there is a
-     * passenger, the hostess removes him from the queue and starts checking in.
+     * passenger, the hostess removes him from the queue and starts the check in.
      *
      * It is called by a hostess.
      */
@@ -128,7 +128,7 @@ public class SRDepartureAirport implements IDepartureAirport_Pilot, IDepartureAi
     /**
      * The hostess asks the passenger for the documents and waits for him to
      * deliver them. When the passenger shows the documents, the hostess accepts
-     * it and adds it to the flight.
+     *  and adds them to the flight.
      *
      * It is called by a hostess.
      */
@@ -221,7 +221,7 @@ public class SRDepartureAirport implements IDepartureAirport_Pilot, IDepartureAi
     }
 
     /**
-     * The passenger waits in line to check in.
+     * The passenger waits in line for the check in.
      *
      * It is called by a passenger.
      */
@@ -324,12 +324,14 @@ public class SRDepartureAirport implements IDepartureAirport_Pilot, IDepartureAi
             Logger.getLogger(SRDepartureAirport.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-
+    
+    /**
+     * The pilot stops his activity when the hostess tells him to.
+     *
+     * It is called by a pilot.
+     */
     public static synchronized boolean informPilotToEndActivity() {
         return hostessInformPilotToEndActivity;
     }
 
-    public synchronized void isInformPilotToCeaseActivity(boolean informPilotToCeaseActivity) {
-        this.hostessInformPilotToEndActivity = informPilotToCeaseActivity;
-    }
 }

@@ -97,6 +97,13 @@ public class MemFIFO<R> extends MemObject<R>{
         return empty;
     }
     
+    /**
+    *   Verify if FIFO contains val.
+    *
+    *   @param val parametric object to be checked
+    *   @return true, if FIFO contains -
+    *            false, otherwise
+    */
     public boolean contains(R val){
         for (int i = outPnt; i < inPnt; i = (i + 1) % mem.length) {
             if (mem[i].equals(val)) {
@@ -106,6 +113,11 @@ public class MemFIFO<R> extends MemObject<R>{
         return false;
     }
     
+    /**
+    *   Removes parametric object from FIFO.
+    *
+    *   @param val parametric object to be removed
+    */
     public void remove(R val){
         boolean shift = false;
         int i = outPnt;
